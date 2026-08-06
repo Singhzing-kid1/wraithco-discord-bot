@@ -13,7 +13,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![commands::age()],
+            commands: vec![commands::age(), commands::role_count()],
             ..Default::default()
         })
         .setup(|ctx, _ready, framework| {
