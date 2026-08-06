@@ -13,7 +13,7 @@ pub async fn age(
     Ok(())
 }
 
-#[poise::command(slash_command)]
+#[poise::command(slash_command, prefix_command)]
 pub async fn role_count(ctx: Context<'_>, #[description = "Role"] role: Option<serenity::Role>) -> Result<(), Error> {
     let r = role.as_ref().unwrap();
     let response = format!("{:#?} members", r.colour);
