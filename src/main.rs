@@ -15,7 +15,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![commands::age(), commands::colour()],
+            commands: vec![commands::age(), commands::count()],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some(std::env::var("PREFIX").expect("missing PREFIX").into()),
                 edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(

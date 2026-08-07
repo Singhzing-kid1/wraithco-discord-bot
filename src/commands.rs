@@ -14,12 +14,18 @@ pub async fn age(
 }
 
 #[poise::command(slash_command, prefix_command)]
-pub async fn colour(
+pub async fn count(
     ctx: Context<'_>,
     #[description = "Role"] role: Option<serenity::Role>,
 ) -> Result<(), Error> {
     let r = role.as_ref().unwrap();
-    let response = format!("{} members", r.colour.hex());
+
+    let guild_id = ctx.guild().unwrap().id; 
+
+    let members = guild_id.members(ctx.http(), None, None).await?;
+    let count = members.iter().filter(|m| m.roles.contains(&r.id)).count();
+
+    let response = format!("{} has {} members", r.name, count);
     ctx.say(response).await?;
     Ok(())
 }
