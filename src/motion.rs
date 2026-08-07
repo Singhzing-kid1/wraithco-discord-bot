@@ -12,10 +12,16 @@ pub async fn create(
         .expect("missing MOTIONS_CHANNEL")
         .parse()?;
 
+    let content = format!("Author: {} \n Date: {} \n Details: \n {}", ctx.author().mention(), ctx.created_at().to_utc(), body);
+    let initial_message = serenity::CreateMessage::new().content(content);
+
+
     let builder =
-        serenity::CreateForumPost::new(title, serenity::CreateMessage::new().content(body));
+        serenity::CreateForumPost::new(title, initial_message);
 
     let new_post = forum_id.create_forum_post(ctx.http(), builder).await?;
+    
+    new_post.id.pin(ctx.http(), serenity::MessageId::new(new_post.id.get())).await?;
 
     ctx.say(format!("Motion Created: {}", new_post.mention()))
         .await?;
