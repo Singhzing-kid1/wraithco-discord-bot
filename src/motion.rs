@@ -1,10 +1,20 @@
 use crate::{Context, Error, helper};
 
-use poise::serenity_prelude as serenity;
+use poise::serenity_prelude::{self as serenity, Mentionable};
 
 
 #[poise::command(slash_command, check = "helper::is_board_of_directors")]
 pub async fn create(ctx: Context<'_>, #[description = "Title of the motion"] title: String, #[description = "motion details"] body: String) -> Result<(), Error> {
-    ctx.say("motion has been created").await?;
+    let forum_id: serenity::ChannelId = std::env::var("MOTIONS_CHANNEL").expect("missing MOTIONS_CHANNEL").parse()?;
+
+    let builder = serenity::CreateForumPost::new(
+        title,
+        serenity::CreateMessage::new().content(body)
+    );
+
+    let new_post = forum_id.create_forum_post(ctx.http(), builder).await?;
+
+    ctx.say(format!("Motion Created: {}", new_post.mention())).await?;
+
     Ok(())
 }
