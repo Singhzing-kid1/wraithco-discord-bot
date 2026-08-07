@@ -1,6 +1,7 @@
 pub mod commands;
 
 use poise::serenity_prelude as serenity;
+use std::sync::Arc;
 
 struct Data {}
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -13,6 +14,12 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
+            prefix_options: poise::PrefixFrameworkOptions {
+                prefix: Some(std::env::var("PREFIX").expect("missing PREFIX").into()),
+                edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(std::time::Duration::from_secs(3600)))),
+                case_insensitive_commands: true,
+                ..Default::default()
+            },
             commands: vec![commands::age(), commands::colour()],
             ..Default::default()
         })
