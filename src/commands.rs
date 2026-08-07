@@ -6,10 +6,7 @@ use poise::serenity_prelude as serenity;
 pub async fn register_commands(
     ctx: Context<'_>
 ) -> Result<(), Error> {
-    println!("register_commands invoked by {}", ctx.author().name);
-    let result = poise::builtins::register_application_commands_buttons(ctx).await;
-    println!("register result: {:?}", result);
-    result?;
+    poise::builtins::register_application_commands_buttons(ctx).await?;
     Ok(())
 }
 
