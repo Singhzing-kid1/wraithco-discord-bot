@@ -1,31 +1,26 @@
-use crate::{Context, Error};
+use crate::{Context, Error, motion};
 
 use poise::serenity_prelude as serenity;
 
-#[poise::command(slash_command, prefix_command)]
-pub async fn age(
-    ctx: Context<'_>,
-    #[description = "Selected User"] user: Option<serenity::User>,
+#[poise::command(prefix_command)]
+pub async fn register_commands(
+    ctx: Context<'_>
 ) -> Result<(), Error> {
-    let u = user.as_ref().unwrap_or_else(|| ctx.author());
-    let response = format!("{}'s account was created at {}", u.name, u.created_at());
-    ctx.say(response).await?;
+    poise::builtins::register_application_commands_buttons(ctx).await?;
     Ok(())
 }
 
-#[poise::command(slash_command, prefix_command)]
-pub async fn count(
-    ctx: Context<'_>,
-    #[description = "Role"] role: Option<serenity::Role>,
+#[poise::command(slash_command, subcommands("motion::create"))]
+pub async fn motion (
+    ctx: Context<'_>
 ) -> Result<(), Error> {
-    let r = role.as_ref().unwrap();
-
-    let guild_id = ctx.guild().unwrap().id; 
-
-    let members = guild_id.members(ctx.http(), None, None).await?;
-    let count = members.iter().filter(|m| m.roles.contains(&r.id)).count();
-
-    let response = format!("{} has {} members", r.name, count);
-    ctx.say(response).await?;
     Ok(())
 }
+
+#[poise::command(slash_command)]
+pub async fn vote (
+    ctx: Context<'_>
+) -> Result<(), Error> {
+    Ok(())
+}
+

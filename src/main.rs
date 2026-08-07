@@ -1,4 +1,7 @@
 pub mod commands;
+pub mod motion;
+pub mod vote;
+pub mod helper;
 
 use poise::serenity_prelude as serenity;
 use std::sync::Arc;
@@ -15,7 +18,7 @@ async fn main() {
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
-            commands: vec![commands::age(), commands::count()],
+            commands: vec![commands::register_commands()],
             prefix_options: poise::PrefixFrameworkOptions {
                 prefix: Some(std::env::var("PREFIX").expect("missing PREFIX").into()),
                 edit_tracker: Some(Arc::new(poise::EditTracker::for_timespan(
@@ -25,12 +28,6 @@ async fn main() {
                 ..Default::default()
             },
             ..Default::default()
-        })
-        .setup(|ctx, _ready, framework| {
-            Box::pin(async move {
-                poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {})
-            })
         })
         .build();
 
