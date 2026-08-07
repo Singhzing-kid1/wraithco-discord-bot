@@ -29,6 +29,11 @@ async fn main() {
             },
             ..Default::default()
         })
+                .setup(|ctx, _ready, framework| {
+            Box::pin(async move {
+                Ok(Data {})
+            })
+        })
         .build();
 
     let client = serenity::ClientBuilder::new(token, intents)
