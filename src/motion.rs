@@ -23,12 +23,7 @@ pub async fn create(
     let initial_message = serenity::CreateMessage::new().content(content);
 
     let channel = forum_id.to_channel(ctx.http()).await?.guild().unwrap();
-    let tag_id = channel
-        .available_tags
-        .iter()
-        .find(|t| t.name == std::env::var("MOTION_OPEN_TAG").expect("mission MOTION_OPEN_TAG"))
-        .map(|t| t.id)
-        .unwrap();
+    let tag_id: serenity::ForumTagId = std::env::var("MOTION_OPEN_TAG").expect("missing MOTION_OPEN_TAG").parse()?;
 
     let builder = serenity::CreateForumPost::new(title, initial_message).set_applied_tags(vec![tag_id]);
 
@@ -63,9 +58,9 @@ pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
 
     message.pin(ctx.http()).await?;
 
-    let parent = motion.clone().guild().unwrap().parent_id.unwrap().to_channel(ctx.http()).await?.guild().unwrap();
 
-    let new_tag_id = parent.available_tags.iter().find(|t| t.name == std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG")).map(|t| t.id).unwrap();
+
+    let new_tag_id: serenity::ForumTagId = std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG").parse()?;
 
     let edit = serenity::EditThread::new().applied_tags(vec![new_tag_id]);
 
