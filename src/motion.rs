@@ -51,5 +51,7 @@ pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
 
     message.pin(ctx.http()).await?;
 
+    ctx.say(format!("{} has been closed.", motion.mention())).await?;
+
     Ok(())
 }
