@@ -1,3 +1,5 @@
+use std::os::unix::process::parent_id;
+
 use crate::{Context, Error, helper};
 
 use poise::serenity_prelude::{self as serenity, Mentionable};
@@ -20,7 +22,15 @@ pub async fn create(
     );
     let initial_message = serenity::CreateMessage::new().content(content);
 
-    let builder = serenity::CreateForumPost::new(title, initial_message);
+    let channel = forum_id.to_channel(ctx.http()).await?.guild().unwrap();
+    let tag_id = channel
+        .available_tags
+        .iter()
+        .find(|t| t.name == std::env::var("MOTION_OPEN_TAG").expect("mission MOTION_OPEN_TAG"))
+        .map(|t| t.id)
+        .unwrap();
+
+    let builder = serenity::CreateForumPost::new(title, initial_message).set_applied_tags(vec![tag_id]);
 
     let new_post = forum_id.create_forum_post(ctx.http(), builder).await?;
 
@@ -38,8 +48,10 @@ pub async fn create(
 #[poise::command(slash_command, check = "helper::is_board_of_directors")]
 pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Error> {
     let content = format!(
-        "the motion ({}) has been closed before voting.",
-        motion.mention()
+        "the motion ({}) has been closed @ {} by {} before voting.",
+        motion.mention(),
+        ctx.created_at().to_utc(),
+        ctx.author().mention()
     );
 
     let message_builder = serenity::CreateMessage::new().content(content);
@@ -51,7 +63,16 @@ pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
 
     message.pin(ctx.http()).await?;
 
-    ctx.say(format!("{} has been closed.", motion.mention())).await?;
+    let parent = motion.clone().guild().unwrap().parent_id.unwrap().to_channel(ctx.http()).await?.guild().unwrap();
+
+    let new_tag_id = parent.available_tags.iter().find(|t| t.name == std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG")).map(|t| t.id).unwrap();
+
+    let edit = serenity::EditThread::new().applied_tags(vec![new_tag_id]);
+
+    motion.id().edit_thread(ctx.http(), edit).await?;
+
+    ctx.say(format!("{} has been closed.", motion.mention()))
+        .await?;
 
     Ok(())
 }
