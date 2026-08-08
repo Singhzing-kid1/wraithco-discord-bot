@@ -8,7 +8,7 @@ pub async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(slash_command, subcommands("motion::create"))]
+#[poise::command(slash_command, subcommands("motion::create", "motion::close"))]
 pub async fn motion(ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
