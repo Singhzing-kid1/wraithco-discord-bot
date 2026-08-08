@@ -15,7 +15,7 @@ pub async fn create(
         .parse()?;
 
     let content = format!(
-        "Author: {}\nDate: {}\nDetails:\n {}",
+        "Author: {}\nDate: {}\nDetails:\n{}",
         ctx.author().mention(),
         ctx.created_at().to_utc(),
         details
@@ -42,32 +42,37 @@ pub async fn create(
 
 #[poise::command(slash_command, check = "helper::is_board_of_directors")]
 pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Error> {
-    let content = format!(
-        "the motion ({}) has been closed @ {} by {} before voting.",
-        motion.mention(),
-        ctx.created_at().to_utc(),
-        ctx.author().mention()
-    );
+    let exsisting_tags = motion.clone().guild().map(|c| c.applied_tags.clone()).unwrap();
 
-    let message_builder = serenity::CreateMessage::new().content(content);
+    if !exsisting_tags.contains(&std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG").parse()?) {
 
-    let message = motion
-        .id()
-        .send_message(ctx.http(), message_builder)
-        .await?;
+        let content = format!(
+            "the motion ({}) has been closed @ {} by {} before voting.",
+            motion.mention(),
+            ctx.created_at().to_utc(),
+            ctx.author().mention()
+        );
 
-    message.pin(ctx.http()).await?;
+        let message_builder = serenity::CreateMessage::new().content(content);
 
+        let message = motion
+            .id()
+            .send_message(ctx.http(), message_builder)
+            .await?;
 
+        message.pin(ctx.http()).await?;
 
-    let new_tag_id: serenity::ForumTagId = std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG").parse()?;
+        let new_tag_id: serenity::ForumTagId = std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG").parse()?;
 
-    let edit = serenity::EditThread::new().applied_tags(vec![new_tag_id]);
+        let edit = serenity::EditThread::new().applied_tags(vec![new_tag_id]);
 
-    motion.id().edit_thread(ctx.http(), edit).await?;
+        motion.id().edit_thread(ctx.http(), edit).await?;
 
-    ctx.say(format!("{} has been closed.", motion.mention()))
-        .await?;
+        ctx.say(format!("{} has been closed.", motion.mention()))
+            .await?;
+    } else {
+        ctx.say(format!("You cannot close a motion that is already closed")).await?;
+    }
 
     Ok(())
 }
