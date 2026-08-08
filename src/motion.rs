@@ -35,16 +35,21 @@ pub async fn create(
     Ok(())
 }
 
-
 #[poise::command(slash_command, check = "helper::is_board_of_directors")]
 pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Error> {
-    let content = format!("the motion ({}) has been closed before voting.", motion.mention());
+    let content = format!(
+        "the motion ({}) has been closed before voting.",
+        motion.mention()
+    );
 
     let message_builder = serenity::CreateMessage::new().content(content);
 
-    let message = motion.id().send_message(ctx.http(), message_builder).await?;
+    let message = motion
+        .id()
+        .send_message(ctx.http(), message_builder)
+        .await?;
 
     message.pin(ctx.http()).await?;
-    
+
     Ok(())
 }
