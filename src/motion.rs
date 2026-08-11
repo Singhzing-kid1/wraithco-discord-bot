@@ -1,5 +1,3 @@
-use std::os::unix::process::parent_id;
-
 use crate::{Context, Error, helper};
 
 use poise::serenity_prelude::{self as serenity, Mentionable};
@@ -22,10 +20,12 @@ pub async fn create(
     );
     let initial_message = serenity::CreateMessage::new().content(content);
 
-    let channel = forum_id.to_channel(ctx.http()).await?.guild().unwrap();
-    let tag_id: serenity::ForumTagId = std::env::var("MOTION_OPEN_TAG").expect("missing MOTION_OPEN_TAG").parse()?;
+    let tag_id: serenity::ForumTagId = std::env::var("MOTION_OPEN_TAG")
+        .expect("missing MOTION_OPEN_TAG")
+        .parse()?;
 
-    let builder = serenity::CreateForumPost::new(title, initial_message).set_applied_tags(vec![tag_id]);
+    let builder =
+        serenity::CreateForumPost::new(title, initial_message).set_applied_tags(vec![tag_id]);
 
     let new_post = forum_id.create_forum_post(ctx.http(), builder).await?;
 
@@ -42,10 +42,25 @@ pub async fn create(
 
 #[poise::command(slash_command, check = "helper::is_board_of_directors")]
 pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Error> {
-    let exsisting_tags = motion.clone().guild().map(|c| c.applied_tags.clone()).unwrap();
+    let exsisting_tags = motion
+        .clone()
+        .guild()
+        .map(|c| c.applied_tags.clone())
+        .unwrap();
 
-    if !exsisting_tags.contains(&std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG").parse()?) {
-
+    if !exsisting_tags.contains(
+        &std::env::var("MOTION_CLOSED_NO_VOTE_TAG")
+            .expect("missing MOTION_CLOSED_NO_VOTE_TAG")
+            .parse()?,
+    ) || !exsisting_tags.contains(
+        &std::env::var("MOTION_CLOSED_ACCEPTED_TAG")
+            .expect("missing MOTION_CLOSED_ACCEPTED_TAG")
+            .parse()?,
+    ) || !exsisting_tags.contains(
+        &std::env::var("MOTION_CLOSED_DENIED_TAG")
+            .expect("missing MOTION_CLOSED_DENIED_TAG")
+            .parse()?,
+    ) {
         let content = format!(
             "the motion ({}) has been closed @ {} by {} before voting.",
             motion.mention(),
@@ -62,7 +77,9 @@ pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
 
         message.pin(ctx.http()).await?;
 
-        let new_tag_id: serenity::ForumTagId = std::env::var("MOTION_CLOSED_NO_VOTE_TAG").expect("missing MOTION_CLOSED_NO_VOTE_TAG").parse()?;
+        let new_tag_id: serenity::ForumTagId = std::env::var("MOTION_CLOSED_NO_VOTE_TAG")
+            .expect("missing MOTION_CLOSED_NO_VOTE_TAG")
+            .parse()?;
 
         let edit = serenity::EditThread::new().applied_tags(vec![new_tag_id]);
 
@@ -71,8 +88,16 @@ pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
         ctx.say(format!("{} has been closed.", motion.mention()))
             .await?;
     } else {
-        ctx.say(format!("You cannot close a motion that is already closed")).await?;
+        ctx.say(format!("You cannot close a motion that is already closed"))
+            .await?;
     }
+
+    Ok(())
+}
+
+#[poise::command(slash_command, check = "helper::is_board_of_directors")]
+pub async fn amend(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Error> {
+    //todo: implement this
 
     Ok(())
 }
