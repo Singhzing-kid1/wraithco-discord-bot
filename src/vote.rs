@@ -25,7 +25,7 @@ pub async fn start(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
     ) {
 
         let poll_builder = serenity::CreatePoll::new()
-            .question(format!("{}", motion.mention()))
+            .question(format!("{}", motion.id().name(ctx.http()).await.unwrap()))
             .answers(vec![
                 serenity::CreatePollAnswer::new().text("Yes"),
                 serenity::CreatePollAnswer::new().text("No"),
