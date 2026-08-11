@@ -1,4 +1,4 @@
-use crate::{Context, Error, motion};
+use crate::{Context, Error, motion, vote};
 
 use poise::serenity_prelude as serenity;
 
@@ -9,11 +9,11 @@ pub async fn register_commands(ctx: Context<'_>) -> Result<(), Error> {
 }
 
 #[poise::command(slash_command, subcommands("motion::create", "motion::close"))]
-pub async fn motion(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn motion(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(slash_command)]
-pub async fn vote(ctx: Context<'_>) -> Result<(), Error> {
+#[poise::command(slash_command, subcommands("vote::start"))]
+pub async fn vote(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
