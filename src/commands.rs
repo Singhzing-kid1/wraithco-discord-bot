@@ -13,7 +13,7 @@ pub async fn motion(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }
 
-#[poise::command(slash_command, subcommands("vote::start", "vote::end"))]
+#[poise::command(slash_command, subcommands("vote::start", "vote::close"))]
 pub async fn vote(_ctx: Context<'_>) -> Result<(), Error> {
     Ok(())
 }

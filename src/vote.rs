@@ -68,7 +68,7 @@ pub async fn start(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
 }
 
 #[poise::command(slash_command, check = "helper::is_board_of_directors")]
-pub async fn end(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<(), Error> {
+pub async fn close(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<(), Error> {
     ctx.channel_id().end_poll(ctx.http(), message_id).await?;
 
     let board_of_directors_role: serenity::RoleId = std::env::var("BOARD_OF_DIRECTORS").expect("missing BOARD_OF_DIRECTORS").parse()?;
