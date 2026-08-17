@@ -4,9 +4,12 @@ pub mod motion;
 pub mod vote;
 
 use poise::serenity_prelude as serenity;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::RwLock;
 
-struct Data {}
+pub struct Data {
+    pub active_polls: Arc<RwLock<HashMap<serenity::MessageId, serenity::ChannelId>>>
+}
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
@@ -30,7 +33,9 @@ async fn main() {
             },
             ..Default::default()
         })
-        .setup(|_ctx, _ready, _framework| Box::pin(async move { Ok(Data {}) }))
+        .setup(|_ctx, _ready, _framework| Box::pin(async move { Ok(Data {
+            active_polls: Arc::new(RwLock::new(HashMap::new()))
+        }) }))
         .build();
 
     let client = serenity::ClientBuilder::new(token, intents)

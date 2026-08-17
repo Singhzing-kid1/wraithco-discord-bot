@@ -52,7 +52,7 @@ pub async fn close(ctx: Context<'_>, motion: serenity::Channel) -> Result<(), Er
         &std::env::var("MOTION_CLOSED_NO_VOTE_TAG")
             .expect("missing MOTION_CLOSED_NO_VOTE_TAG")
             .parse()?,
-    ) || !exsisting_tags.contains(
+    ) || !exsisting_tags.contains( 
         &std::env::var("MOTION_CLOSED_ACCEPTED_TAG")
             .expect("missing MOTION_CLOSED_ACCEPTED_TAG")
             .parse()?,
