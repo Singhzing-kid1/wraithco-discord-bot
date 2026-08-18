@@ -104,9 +104,9 @@ pub async fn close(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<
                 },
                 "No" => {
                     if member.roles.contains(&ceo_role) {
-                        vote_no += 1.0 * CEO_VOTING_POWER;
+                        vote_no -= 1.0 * CEO_VOTING_POWER;
                     } else {
-                        vote_no += 1.0 * per_member_voting_power;
+                        vote_no -= 1.0 * per_member_voting_power;
                     }
                 },
                 _ => {}
@@ -116,9 +116,11 @@ pub async fn close(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<
 
     let vote = vote_yes + vote_no;
 
-    let voting_results = format!("{}% voted yes.\n{}% voted no.", vote_yes * 100.0, vote_no * -100.0);
+    let voting_results = format!("{}% voted yes.\n{}% voted no.", vote_yes * 100.0, vote_no.abs() * 100.0);
 
     let motion = helper::remove_and_read_poll(ctx, message_id).await.unwrap();
+
+    let mut output: String;
 
     if vote > 0.0 {
         let content = format!("{}\n{} has been accepted and closed @ {}", voting_results, motion.mention(), ctx.created_at().to_utc());
@@ -131,9 +133,10 @@ pub async fn close(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<
 
         let edit = serenity::EditThread::new().applied_tags(vec![new_tag_id]);
 
+        output = format!("{} has been closed and accepted due to voting\n{}", motion.mention(), voting_results);
+
         motion.edit_thread(ctx.http(), edit).await?;
 
-        ctx.say(format!("{} has been closed and accepted due to voting\n{}", motion.mention(), voting_results)).await?;
     } else {
         let content = format!("{}\n{} has been denied and closed @ {}", voting_results, motion.mention(), ctx.created_at().to_utc());
 
@@ -145,11 +148,12 @@ pub async fn close(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<
 
         let edit = serenity::EditThread::new().applied_tags(vec![new_tag_id]);
 
-        motion.edit_thread(ctx.http(), edit).await?;
+        output = format!("{} has been closed and denied due to voting\n{}", motion.mention(), voting_results);
 
-        ctx.say(format!("{} has been closed and denied due to voting\n{}", motion.mention(), voting_results)).await?;
+        motion.edit_thread(ctx.http(), edit).await?;
     }
 
+    ctx.say(output).await?;
 
     Ok(())
 }
