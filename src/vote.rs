@@ -120,7 +120,7 @@ pub async fn close(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<
 
     let motion = helper::remove_and_read_poll(ctx, message_id).await.unwrap();
 
-    let mut output: String;
+    let output: String;
 
     if vote > 0.0 {
         let content = format!("{}\n{} has been accepted and closed @ {}", voting_results, motion.mention(), ctx.created_at().to_utc());
@@ -150,9 +150,11 @@ pub async fn close(ctx: Context<'_>, message_id: serenity::MessageId) -> Result<
 
         output = format!("{} has been closed and denied due to voting\n{}", motion.mention(), voting_results);
 
+
         motion.edit_thread(ctx.http(), edit).await?;
     }
 
+    println!("{}", output);
     ctx.say(output).await?;
 
     Ok(())
